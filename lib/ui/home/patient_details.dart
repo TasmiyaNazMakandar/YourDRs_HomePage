@@ -79,13 +79,25 @@ class _PatientDetailState extends State<PatientDetail> {
                               style:
                                   TextStyle(color: Colors.white, fontSize: 14),
                             ),
-                            Text(
-                              "John Careet",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 14),
+                            Row(
+                              children: [
+                                Text(
+                                  item.patient?.sex ?? "",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 14),
+                                ),
+                                Text(",",
+                                    style: TextStyle(color: Colors.white)),
+                                Text(
+                                  item.patient?.age.toString() + "year old" ??
+                                      "",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 14),
+                                ),
+                              ],
                             ),
                             Text(
-                              "John Careet",
+                              item.scheduleName ?? "",
                               style:
                                   TextStyle(color: Colors.white, fontSize: 14),
                             ),
@@ -104,15 +116,15 @@ class _PatientDetailState extends State<PatientDetail> {
                         // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Text(
-                            "John Caret",
+                            "DOB:" + item.patient?.dob ?? "",
                             style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
                           Text(
-                            "John Carete",
+                            "Case#:" + item.patient?.accountNumber ?? "",
                             style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
                           Text(
-                            "John Carete",
+                            "DOB:" + item.patient?.dob ?? "",
                             style: TextStyle(color: Colors.white, fontSize: 14),
                           ),
                         ],

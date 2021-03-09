@@ -46,8 +46,16 @@ class Services {
         dateTime: defaultDate);
     final json = {
       "memberId": 1,
-      "appointmentStartDate": startDate ?? todayDate,
-      "appointmentEndDate": endDate ?? todayDate,
+      "appointmentStartDate": startDate != null
+          ? startDate
+          : date == null
+              ? todayDate
+              : date,
+      "appointmentEndDate": endDate != null
+          ? endDate
+          : date == null
+              ? todayDate
+              : date,
       "locationId": locationId ?? null,
       "patientSearchString": searchString ?? null,
       "dictationStatusId": dictationId ?? null,

@@ -15,6 +15,7 @@ import 'package:YOURDRS_FlutterAPP/widget/input_fields/search_bar.dart';
 import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:grouped_list/grouped_list.dart';
 
 class HomePortrait extends StatefulWidget {
   HomePortrait({key}) : super(key: key);
@@ -67,8 +68,17 @@ class _HomePortraitState extends State<HomePortrait> {
         dictationId: null,
         startDate: null,
         endDate: null));
+    // this.groupEmployeesByCountry(patients);
+    // ignore: unused_element
   }
 
+  // void groupEmployeesByCountry(List<ScheduleList> patients) {
+  //   final groups = groupBy(patients, (ScheduleList e) {
+  //     return e.practice;
+  //   });
+
+  //   print("testing" + groups.toString());
+  // }
 //filter method  for selected date
 
 //Date Picker Controller related code
@@ -475,17 +485,32 @@ class _HomePortraitState extends State<HomePortrait> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              SizedBox(
+                              Container(
                                 height: 55,
-                                width: 250,
+                                width: 245,
+                                margin: EdgeInsets.only(top: 5),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                    border: Border.all(
+                                        color: CustomizedColors
+                                            .homeSubtitleColor)),
                                 child: RaisedButton.icon(
                                     padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  DateFilter()));
+                                    onPressed: () async {
+                                      final List<String> result =
+                                          await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      DateFilter()));
+
+                                      startDate = result.first;
+
+                                      endDate = result.last;
+
+                                      print("range1" + startDate);
+
+                                      print("range2" + endDate);
                                     },
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.all(
@@ -497,8 +522,92 @@ class _HomePortraitState extends State<HomePortrait> {
                                           color: CustomizedColors
                                               .buttonTitleColor),
                                     ),
-                                    icon: Icon(null),
+                                    icon: Icon(Icons.date_range),
+
                                     // textColor: Colors.red,
+
+                                    splashColor: CustomizedColors.primaryColor,
+                                    color: Colors.white),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                height: 55,
+                                width: 245,
+                                margin: EdgeInsets.only(top: 5),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                    border: Border.all(
+                                        color: CustomizedColors
+                                            .homeSubtitleColor)),
+                                child: RaisedButton.icon(
+                                    padding: EdgeInsets.only(left: 25),
+                                    onPressed: () {
+                                      return showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              title: Text('Search Patients'),
+                                              content: TextField(
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    valueText = value;
+
+                                                    print(valueText);
+                                                  });
+                                                },
+                                                controller:
+                                                    this._textFieldController,
+                                                decoration: InputDecoration(
+                                                    hintText:
+                                                        "Search Patients"),
+                                              ),
+                                              actions: <Widget>[
+                                                FlatButton(
+                                                  color: CustomizedColors
+                                                      .accentColor,
+                                                  textColor: Colors.white,
+                                                  child: Text('CANCEL'),
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      Navigator.pop(context);
+                                                    });
+                                                  },
+                                                ),
+                                                FlatButton(
+                                                  color: CustomizedColors
+                                                      .accentColor,
+                                                  textColor: Colors.white,
+                                                  child: Text('OK'),
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      codeDialog = valueText;
+
+                                                      Navigator.pop(context);
+                                                    });
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          });
+                                    },
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5.0))),
+                                    label: Text(
+                                      "Search Patient" ??
+                                          "${this._textFieldController.text}",
+                                      style: TextStyle(
+                                        fontSize: 16.0,
+                                        color:
+                                            CustomizedColors.buttonTitleColor,
+                                      ),
+                                    ),
+                                    icon: Icon(Icons.search),
                                     splashColor: CustomizedColors.primaryColor,
                                     color: Colors.white),
                               ),
@@ -507,23 +616,35 @@ class _HomePortraitState extends State<HomePortrait> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              SizedBox(
+                              Container(
                                 height: 55,
-                                width: 250,
+                                width: 245,
+                                margin: EdgeInsets.only(top: 5),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                    border: Border.all(
+                                        color: CustomizedColors
+                                            .homeSubtitleColor)),
                                 child: RaisedButton.icon(
                                     padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
                                     onPressed: () {
                                       setState(() {
                                         visibleSearchFilter = false;
+
                                         visibleClearFilter = true;
                                       });
+
                                       Navigator.pop(context);
+
                                       BlocProvider.of<PatientBloc>(context).add(
                                           GetSchedulePatientsList(
                                               keyword1: null,
                                               providerId: null,
                                               locationId: null,
-                                              dictationId: null));
+                                              dictationId: null,
+                                              startDate: null,
+                                              endDate: null,
+                                              searchString: null));
                                     },
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.all(
@@ -535,8 +656,10 @@ class _HomePortraitState extends State<HomePortrait> {
                                           color: CustomizedColors
                                               .buttonTitleColor),
                                     ),
-                                    icon: Icon(null),
+                                    icon: Icon(Icons.filter_alt_sharp),
+
                                     // textColor: Colors.red,
+
                                     splashColor: CustomizedColors.primaryColor,
                                     color: Colors.white),
                               ),
@@ -695,15 +818,7 @@ class _HomePortraitState extends State<HomePortrait> {
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "HEMA 54-DEAN (4)",
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18.0),
-                                        )
-                                      ],
+                                      children: [],
                                     ),
                                     BlocBuilder<PatientBloc,
                                             PatientAppointmentBlocState>(
@@ -747,118 +862,123 @@ class _HomePortraitState extends State<HomePortrait> {
                                       } else {
                                         filteredPatients = patients;
                                       }
-
+                                      print(filteredPatients?.length);
                                       return filteredPatients != null &&
                                               filteredPatients.isNotEmpty
-                                          ? ListView.separated(
-                                              separatorBuilder:
-                                                  (context, index) => Divider(
-                                                color: CustomizedColors.title,
-                                              ),
-                                              physics:
-                                                  NeverScrollableScrollPhysics(),
-                                              shrinkWrap: true,
-                                              itemCount:
-                                                  filteredPatients.length,
-                                              itemBuilder:
-                                                  (BuildContext context,
-                                                      int index) {
-                                                return Hero(
-                                                  tag: filteredPatients[index],
-                                                  child: Material(
-                                                    child: ListTile(
-                                                      contentPadding:
-                                                          EdgeInsets.all(0),
-                                                      leading: Icon(
-                                                        Icons.bookmark,
-                                                        color: Colors.green,
+                                          ? Card(
+                                              child: GroupedListView<dynamic,
+                                                      String>(
+                                                  elements: filteredPatients,
+                                                  shrinkWrap: true,
+                                                  groupBy: (element) {
+                                                    print(
+                                                        'groupBy ${element.practice}');
+
+                                                    return element.practice;
+                                                  },
+                                                  groupSeparatorBuilder: (String
+                                                          practice) =>
+                                                      TransactionGroupSeparator(
+                                                        practice: practice,
                                                       ),
-                                                      onTap: () {
-                                                        Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                PatientDetail(),
-                                                            // Pass the arguments as part of the RouteSettings. The
-                                                            // DetailScreen reads the arguments from these settings.
-                                                            settings:
-                                                                RouteSettings(
-                                                              arguments:
-                                                                  filteredPatients[
-                                                                      index],
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
-                                                      title: Text(
-                                                          filteredPatients[
-                                                                  index]
-                                                              .patient
-                                                              .displayName),
-                                                      subtitle: Column(
-                                                        children: [
-                                                          Container(
-                                                            child: Text("Dr." +
-                                                                    "" +
-                                                                    filteredPatients[
-                                                                            index]
-                                                                        .providerName ??
-                                                                ""),
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              Container(
-                                                                width: 50,
-                                                                child: Text(
-                                                                    filteredPatients[index]
-                                                                            .appointmentType ??
-                                                                        "",
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            12.0)),
-                                                              ),
-                                                              Container(
-                                                                width: 75,
-                                                                child: Text(
-                                                                  filteredPatients[
-                                                                              index]
-                                                                          .appointmentStatus ??
-                                                                      "",
-                                                                  style: TextStyle(
-                                                                      fontSize:
-                                                                          12.0),
-                                                                ),
-                                                              )
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      trailing: Column(
-                                                        children: [
-                                                          Spacer(),
-                                                          Spacer(),
-                                                          RichText(
-                                                            text: TextSpan(
-                                                              text: '• ',
-                                                              style: TextStyle(
+                                                  order: GroupedListOrder.ASC,
+                                                  itemBuilder:
+                                                      (context, element) =>
+                                                          Hero(
+                                                            tag: element,
+                                                            child: Material(
+                                                              child: ListTile(
+                                                                contentPadding:
+                                                                    EdgeInsets
+                                                                        .all(0),
+                                                                leading: Icon(
+                                                                  Icons
+                                                                      .bookmark,
                                                                   color: Colors
-                                                                      .red,
-                                                                  fontSize: 14),
-                                                              children: <
-                                                                  TextSpan>[
-                                                                TextSpan(
-                                                                    text: 'Dictation' +
-                                                                            filteredPatients[index].dictationStatus ??
-                                                                        ""),
-                                                              ],
+                                                                      .green,
+                                                                ),
+                                                                onTap: () {
+                                                                  Navigator
+                                                                      .push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              PatientDetail(),
+                                                                      // Pass the arguments as part of the RouteSettings. The
+                                                                      // DetailScreen reads the arguments from these settings.
+                                                                      settings:
+                                                                          RouteSettings(
+                                                                        arguments:
+                                                                            element,
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                },
+                                                                title: Text(element
+                                                                    .patient
+                                                                    .displayName),
+                                                                subtitle:
+                                                                    Column(
+                                                                  children: [
+                                                                    Container(
+                                                                      child: Text("Dr." +
+                                                                              "" +
+                                                                              element.providerName ??
+                                                                          ""),
+                                                                    ),
+                                                                    Row(
+                                                                      children: [
+                                                                        Container(
+                                                                          width:
+                                                                              50,
+                                                                          child: Text(
+                                                                              element.appointmentType ?? "",
+                                                                              style: TextStyle(fontSize: 12.0)),
+                                                                        ),
+                                                                        Expanded(
+                                                                          child:
+                                                                              Container(
+                                                                            width:
+                                                                                75,
+                                                                            child:
+                                                                                Text(
+                                                                              element.appointmentStatus ?? "",
+                                                                              overflow: TextOverflow.ellipsis,
+                                                                              style: TextStyle(fontSize: 12.0),
+                                                                            ),
+                                                                          ),
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                trailing:
+                                                                    Column(
+                                                                  children: [
+                                                                    Spacer(),
+                                                                    Spacer(),
+                                                                    RichText(
+                                                                      text:
+                                                                          TextSpan(
+                                                                        text:
+                                                                            '• ',
+                                                                        style: TextStyle(
+                                                                            color:
+                                                                                Colors.red,
+                                                                            fontSize: 14),
+                                                                        children: <
+                                                                            TextSpan>[
+                                                                          TextSpan(
+                                                                              text: 'Dictation' + element.dictationStatus ?? ""),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                              ),
                                                             ),
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
+                                                          )),
                                             )
                                           : Container(
                                               //   child: Text(
@@ -916,6 +1036,23 @@ class _HomePortraitState extends State<HomePortrait> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class TransactionGroupSeparator extends StatelessWidget {
+  final String practice;
+  TransactionGroupSeparator({this.practice});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        child: Text(
+          "${this.practice}",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
     );

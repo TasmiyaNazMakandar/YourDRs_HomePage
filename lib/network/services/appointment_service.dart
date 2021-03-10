@@ -70,7 +70,7 @@ class Services {
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
-
+//mapping the data come from the model class  Patients
     if (response.statusCode == 200) {
       Schedule schedule =
           Schedule.fromJson(jsonDecode(response.body.toString()));

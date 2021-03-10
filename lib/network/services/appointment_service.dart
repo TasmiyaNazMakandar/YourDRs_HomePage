@@ -5,14 +5,14 @@ import 'package:YOURDRS_FlutterAPP/network/models/appointment.dart';
 import 'package:YOURDRS_FlutterAPP/network/models/location.dart';
 import 'package:YOURDRS_FlutterAPP/network/models/provider.dart';
 import 'package:YOURDRS_FlutterAPP/network/models/schedule.dart';
-// import 'package:YOURDRS_FlutterAPP/network/models/schedule_list.dart';
+
 
 import 'package:http/http.dart' as http;
 
 class Services {
   static const String url = 'https://jsonplaceholder.typicode.com/users';
 
-//getUsers service method
+//getUsers service method  also maintaining exception handling
   static Future<List<Patients>> getUsers() async {
     try {
       final response = await http.get(url);
@@ -26,12 +26,12 @@ class Services {
       throw Exception(e.toString());
     }
   }
-
+//mapping the data come from the model class  Patients
   static List<Patients> parseUsers(String responseBody) {
     final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
     return parsed.map<Patients>((json) => Patients.fromJson(json)).toList();
   }
-
+//getSchedule service method  also maintaining exception handling
   static Future<List<ScheduleList>> getSchedule(
       String date,
       int providerId,
@@ -70,17 +70,19 @@ class Services {
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
-
-    if (response.statusCode == 200) {
-      Schedule schedule =
-          Schedule.fromJson(jsonDecode(response.body.toString()));
-      return schedule.scheduleList;
-    } else {
-      throw Exception("Error");
-    }
+    //checking the condition statusCode success or not if success get data or throw the error
+     try {
+       if (response.statusCode == 200) {
+         Schedule schedule =
+         Schedule.fromJson(jsonDecode(response.body.toString()));
+         return schedule.scheduleList;
+       } else {
+         throw Exception("Error");
+       }
+     } catch(e){ throw Exception(e.toString());}
   }
 
-  //getLocation service method//
+  //getLocation service method  also maintaining exception handling
 
   Future<Locations> getLocation() async {
     try {
@@ -92,6 +94,7 @@ class Services {
       var requestUrl = endpointUrl + '?' + queryString;
       final response = await http.get(Uri.encodeFull(requestUrl),
           headers: {"Accept": "application/json"});
+      //checking the condition statusCode success or not if success get data or throw the error 
       if (response.statusCode == 200) {
         Locations location = parseLocation(response.body);
         // print(list);
@@ -103,13 +106,13 @@ class Services {
       throw Exception(e.toString());
     }
   }
-
+//mapping the data come from the model class  Locations
   static Locations parseLocation(String responseBody) {
     final Locations location = Locations.fromJson(json.decode(responseBody));
     return location;
   }
 
-//getProviders service
+//getProviders service also maintaining exception handling
   Future<Providers> getProviders() async {
     try {
       var endpointUrl = ApiUrlConstants.getProviders;
@@ -120,6 +123,7 @@ class Services {
       var requestUrl = endpointUrl + '?' + queryString;
       final response = await http.get(Uri.encodeFull(requestUrl),
           headers: {"Accept": "application/json"});
+      //checking the condition statusCode success or not if success get data or throw the error
       if (response.statusCode == 200) {
         Providers provider = parseProviders(response.body);
         // print(list);
@@ -131,9 +135,10 @@ class Services {
       throw Exception(e.toString());
     }
   }
-
+//mapping the data come from the model class  Providers
   static Providers parseProviders(String responseBody) {
     final Providers provider = Providers.fromJson(json.decode(responseBody));
     return provider;
   }
 }
+

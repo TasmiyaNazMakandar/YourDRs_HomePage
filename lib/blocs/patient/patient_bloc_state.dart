@@ -2,6 +2,7 @@ import 'package:YOURDRS_FlutterAPP/blocs/base/base_bloc_state.dart';
 import 'package:YOURDRS_FlutterAPP/network/models/appointment.dart';
 import 'package:YOURDRS_FlutterAPP/network/models/schedule.dart';
 
+//declaring the variables for error messages ,loading
 class PatientAppointmentBlocState extends BaseBlocState {
   final bool isLoading;
   final String errorMsg;
@@ -16,12 +17,14 @@ class PatientAppointmentBlocState extends BaseBlocState {
   final String searchString;
   final List<ScheduleList> patients;
 
+// PatientAppointmentBlocState with init method
   factory PatientAppointmentBlocState.initial() => PatientAppointmentBlocState(
         errorMsg: null,
         isLoading: false,
         users: null,
       );
 
+// resets the PatientAppointmentBlocState.initial()
   PatientAppointmentBlocState reset() => PatientAppointmentBlocState.initial();
 
   PatientAppointmentBlocState(
@@ -70,6 +73,7 @@ class PatientAppointmentBlocState extends BaseBlocState {
         searchString: searchString ?? this.searchString);
   }
 
+//writing tostring method
   @override
   String toString() {
     return 'PatientAppointmentMainState{isLoading: $isLoading, errorMsg: $errorMsg, users: $users, keyword: $keyword},patients:$patients';

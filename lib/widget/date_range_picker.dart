@@ -72,93 +72,106 @@ class DateFilterState extends State<DateFilter> {
   Container container(double height1) {
     return Container(
 // color: Colors.green,
-      child: Column(
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.only(top: 15),
-            height: MediaQuery.of(context).size.height * 0.07,
-            width: MediaQuery.of(context).size.width,
-            color: CustomizedColors.accentColor,
-            child: Text(
-              "Calendar",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: CustomizedColors.textColor,
-                fontSize: 20,
+      child: ListView(
+        children: [
+          Column(
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.only(top: 15),
+                height: MediaQuery.of(context).size.height * 0.07,
+                width: MediaQuery.of(context).size.width,
+                color: CustomizedColors.accentColor,
+                child: Text(
+                  "Calendar",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: CustomizedColors.textColor,
+                    fontSize: 20,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Container(
-              child: Text(
-                'Selected Dates: ' + range,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+              Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Container(
+                  child: Text(
+                    'Selected Dates: ' + range,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                  ),
+                ),
               ),
-            ),
-          ),
-          Container(
-            height: height1,
-            child: SfDateRangePicker(
-              view: DateRangePickerView.month,
-              monthViewSettings: DateRangePickerMonthViewSettings(
-                  blackoutDates: List<DateTime>()..add(DateTime(2020, 03, 26)),
-                  weekendDays: List<int>()..add(7)..add(6),
-                  specialDates: List<DateTime>()
-                    ..add(DateTime(2020, 03, 20))
-                    ..add(DateTime(2020, 03, 16))
-                    ..add(DateTime(2020, 03, 17)),
-                  showTrailingAndLeadingDates: true),
-              monthCellStyle: DateRangePickerMonthCellStyle(
-// blackoutDatesDecoration: BoxDecoration(
-// color: Colors.red,
-// border: Border.all(color: const Color(0xFFF44436), width: 1),
-// shape: BoxShape.circle),
+              Container(
+                height: height1,
+                child: SfDateRangePicker(
+                  view: DateRangePickerView.month,
+                  monthViewSettings: DateRangePickerMonthViewSettings(
+                      blackoutDates: List<DateTime>()
+                        ..add(DateTime(2020, 03, 26)),
+                      weekendDays: List<int>()..add(7)..add(6),
+                      specialDates: List<DateTime>()
+                        ..add(DateTime(2020, 03, 20))
+                        ..add(DateTime(2020, 03, 16))
+                        ..add(DateTime(2020, 03, 17)),
+                      showTrailingAndLeadingDates: true),
+                  monthCellStyle: DateRangePickerMonthCellStyle(
+                    // blackoutDatesDecoration: BoxDecoration(
 
-                weekendDatesDecoration: BoxDecoration(
-                    color: const Color(0xFFDFDFDF),
-                    border:
-                        Border.all(color: const Color(0xFFB6B6B6), width: 1),
-                    shape: BoxShape.circle),
+                    // color: Colors.red,
 
-// specialDatesDecoration: BoxDecoration(
-// color: Colors.green,
-// border: Border.all(color: const Color(0xFF2B732F), width: 1),
-// shape: BoxShape.circle),
+                    // border: Border.all(color: const Color(0xFFF44436), width: 1),
 
-// blackoutDateTextStyle: TextStyle(color: Colors.white, decoration: TextDecoration.lineThrough),
-// specialDatesTextStyle: const TextStyle(color: Colors.white),
+                    // shape: BoxShape.circle),
+
+                    weekendDatesDecoration: BoxDecoration(
+                        color: const Color(0xFFDFDFDF),
+                        border: Border.all(
+                            color: const Color(0xFFB6B6B6), width: 1),
+                        shape: BoxShape.circle),
+
+                    // specialDatesDecoration: BoxDecoration(
+
+                    // color: Colors.green,
+
+                    // border: Border.all(color: const Color(0xFF2B732F), width: 1),
+
+                    // shape: BoxShape.circle),
+
+                    // blackoutDateTextStyle: TextStyle(color: Colors.white, decoration: TextDecoration.lineThrough),
+
+                    // specialDatesTextStyle: const TextStyle(color: Colors.white),
+                  ),
+                  navigationDirection:
+                      DateRangePickerNavigationDirection.vertical,
+                  onSelectionChanged: _onSelectionChanged,
+                  selectionMode: DateRangePickerSelectionMode.range,
+                  selectionColor: Colors.purple,
+                  startRangeSelectionColor: CustomizedColors.accentColor,
+                  endRangeSelectionColor: CustomizedColors.accentColor,
+                  todayHighlightColor: CustomizedColors.accentColor,
+                  initialSelectedRange: PickerDateRange(
+                      DateTime.now().subtract(const Duration(days: 4)),
+                      DateTime.now().add(const Duration(days: 3))),
+                ),
               ),
-              navigationDirection: DateRangePickerNavigationDirection.vertical,
-              onSelectionChanged: _onSelectionChanged,
-              selectionMode: DateRangePickerSelectionMode.range,
-              selectionColor: Colors.purple,
-              startRangeSelectionColor: CustomizedColors.accentColor,
-              endRangeSelectionColor: CustomizedColors.accentColor,
-              todayHighlightColor: CustomizedColors.accentColor,
-              initialSelectedRange: PickerDateRange(
-                  DateTime.now().subtract(const Duration(days: 4)),
-                  DateTime.now().add(const Duration(days: 3))),
-            ),
-          ),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.040,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              RaisedButtons(
-                  text: "Cancel",
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-              RaisedButtons(
-                  text: "Ok",
-                  onPressed: () {
-                    Navigator.pop(context, dateRange);
-                  }),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.040,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  RaisedButtons(
+                      text: "Cancel",
+                      onPressed: () {
+                        Navigator.pop(context);
+                      }),
+                  RaisedButtons(
+                      text: "Ok",
+                      onPressed: () {
+                        Navigator.pop(context, dateRange);
+                      }),
+                ],
+              ),
             ],
           ),
         ],

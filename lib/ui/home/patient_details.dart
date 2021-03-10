@@ -55,16 +55,13 @@ class _PatientDetailState extends State<PatientDetail> {
                 children: <Widget>[
                   ListTile(
                     leading: Hero(
-                        transitionOnUserGestures: true,
                         tag: item,
                         child: Transform.scale(
                           scale: 2.0,
                           child: CircleAvatar(
                             radius: 18,
-                            child: ClipOval(
-                              child: Image.network(
-                                  "https://image.freepik.com/free-vector/doctor-icon-avatar-white_136162-58.jpg"),
-                            ),
+                            backgroundImage: NetworkImage(
+                                "https://image.freepik.com/free-vector/doctor-icon-avatar-white_136162-58.jpg"),
                           ),
                         )),
                     trailing:

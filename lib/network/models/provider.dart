@@ -80,4 +80,17 @@ class ProviderList {
     data['suffix'] = this.suffix;
     return data;
   }
+
+  @override
+  String toString() {
+    return 'ProviderList{providerId: $providerId, displayname: $displayname}';
+  }
+
+  @override
+// TODO: implement props
+  List<Object> get props => [
+        this.providerId,
+        this.displayname,
+        this.firstName,
+      ];
 }

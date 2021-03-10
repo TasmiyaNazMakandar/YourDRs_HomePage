@@ -5,12 +5,13 @@ abstract class PatientAppointmentBlocEvent extends BaseBlocEvent {}
 
 class GetPatientAppointmentBlocEvent extends PatientAppointmentBlocEvent {
   @override
+  //declaring the list of objects
   List<Object> get props => [];
 }
 
 class SearchPatientEvent extends PatientAppointmentBlocEvent {
   final String keyword;
-
+//writting the search event
   SearchPatientEvent({@required this.keyword});
 
   @override
@@ -19,7 +20,7 @@ class SearchPatientEvent extends PatientAppointmentBlocEvent {
 
 class GetProvidersListEvent extends PatientAppointmentBlocEvent {
   final String memberId;
-
+// Event  for geting the list of provider
   GetProvidersListEvent({this.memberId});
 
   @override
@@ -28,6 +29,7 @@ class GetProvidersListEvent extends PatientAppointmentBlocEvent {
 
 // Creating an event GetSchedulePatientList
 class GetSchedulePatientsList extends PatientAppointmentBlocEvent {
+  //declaring the variables for event
   final String keyword1;
   final int providerId;
   final int locationId;

@@ -42,8 +42,12 @@ dependencies:
   dio: ^3.0.10
   # Network logging
   pretty_dio_logger: ^1.1.0
+  # for grouping of Scheduled List
   grouped_list: ^3.7.1
+  # for implementing the searchable drop downs
   searchable_dropdown: ^1.1.3
+  # for implementing the Lazy Loading for Schedule List
+  lazy_load_scrollview: ^1.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

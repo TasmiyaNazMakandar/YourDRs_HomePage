@@ -1,3 +1,4 @@
+import 'package:YOURDRS_FlutterAPP/network/models/dictation.dart';
 import 'package:flutter/material.dart';
 
 //customized colors file//
@@ -18,4 +19,6 @@ class CustomizedColors {
   static const title = Color.fromRGBO(207, 203, 202, 1);
   static const noAppointment = Color.fromRGBO(34, 82, 160, 1);
   static const buttonTitleColor = Colors.black;
+  static const dotColor = Colors.red;
+  static const dictationStatusColor = Colors.black38;
 }

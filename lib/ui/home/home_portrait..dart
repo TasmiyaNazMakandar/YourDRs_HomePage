@@ -5,6 +5,7 @@ import 'package:YOURDRS_FlutterAPP/blocs/patient/patient_bloc_state.dart';
 import 'package:YOURDRS_FlutterAPP/common/app_colors.dart';
 import 'package:YOURDRS_FlutterAPP/common/app_constants.dart';
 import 'package:YOURDRS_FlutterAPP/common/app_pop_menu.dart';
+import 'package:YOURDRS_FlutterAPP/network/models/provider.dart';
 import 'package:YOURDRS_FlutterAPP/network/models/schedule.dart';
 import 'package:YOURDRS_FlutterAPP/ui/home/patient_details.dart';
 import 'package:YOURDRS_FlutterAPP/widget/date_range_picker.dart';
@@ -16,6 +17,8 @@ import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grouped_list/grouped_list.dart';
+import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
+import '../../network/models/dictation.dart';
 
 class HomePortrait extends StatefulWidget {
   HomePortrait({key}) : super(key: key);
@@ -23,6 +26,7 @@ class HomePortrait extends StatefulWidget {
   _HomePortraitState createState() => _HomePortraitState();
 }
 
+//debouncer related class for Patient search related
 class Debouncer {
   final int milliseconds;
   VoidCallback action;
@@ -43,20 +47,31 @@ class _HomePortraitState extends State<HomePortrait> {
   final _debouncer = Debouncer(milliseconds: 500);
 
   Map<String, dynamic> appointment;
+  //var for selected Provider Id ,Dictation Id,Location Id
   var _currentSelectedProviderId;
   var _currentSelectedLocationId;
   var _currentSelectedDictationId;
-
+// list of Patients
   List<ScheduleList> patients = List();
   List<ScheduleList> filteredPatients = List();
 
+// Declared Variables for start Date and end Date
   String startDate;
   String endDate;
+  //booean property for visibility for search and clear filter
   bool visibleSearchFilter = false;
   bool visibleClearFilter = true;
+  //booean property for visibility for Date Picker
+  bool datePicker = true;
+  bool dateRange = false;
   String codeDialog;
   String valueText;
 
+//Lazyloading related variables
+  List<int> verticalData = [];
+  final int increment = 10;
+
+  bool isLoadingVertical = false;
   TextEditingController _textFieldController = TextEditingController();
   @override
   void initState() {
@@ -68,20 +83,26 @@ class _HomePortraitState extends State<HomePortrait> {
         dictationId: null,
         startDate: null,
         endDate: null));
-    // this.groupEmployeesByCountry(patients);
-    // ignore: unused_element
+    _loadMoreVertical();
   }
 
-  // void groupEmployeesByCountry(List<ScheduleList> patients) {
-  //   final groups = groupBy(patients, (ScheduleList e) {
-  //     return e.practice;
-  //   });
+//Method for LazyLoaing
+  Future _loadMoreVertical() async {
+    setState(() {
+      isLoadingVertical = true;
+    });
 
-  //   print("testing" + groups.toString());
-  // }
-//filter method  for selected date
+    // Add in an artificial delay
+    await new Future.delayed(const Duration(seconds: 2));
 
-//Date Picker Controller related code
+    verticalData.addAll(
+        List.generate(increment, (index) => verticalData.length + index));
+
+    setState(() {
+      isLoadingVertical = false;
+    });
+  }
+
   DatePickerController _controller = DatePickerController();
 
   DateTime _selectedValue = DateTime.now();
@@ -136,308 +157,7 @@ class _HomePortraitState extends State<HomePortrait> {
                     color: CustomizedColors.iconColor,
                   ),
                   onPressed: () {
-                    return showDialog(
-                      context: context,
-                      builder: (ctx) => ListView(
-                        children: [
-                          AlertDialog(
-                            title: Text(
-                              "Select a filter",
-                              style: TextStyle(),
-                            ),
-                            actions: <Widget>[
-                              ProviderDropDowns(
-                                selectedValue: _currentSelectedProviderId,
-                                onTap: (String newValue) {
-                                  print('onTap newValue $newValue');
-
-                                  // setState(() {
-
-                                  _currentSelectedProviderId = newValue;
-
-                                  print(
-                                      'onTap _currentSelectedProviderId $_currentSelectedProviderId');
-
-                                  // });
-                                },
-                              ),
-                              Dictation(onTapOfDictation: (String newValue) {
-                                setState(() {
-                                  _currentSelectedDictationId = newValue;
-
-                                  print(_currentSelectedDictationId);
-                                });
-                              }),
-                              LocationDropDown(
-                                  onTapOfLocation: (String newValue) {
-                                // setState(() {
-
-                                _currentSelectedLocationId = newValue;
-
-                                print(_currentSelectedLocationId);
-
-                                // });
-                              }),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 55,
-                                    width: 245,
-                                    margin: EdgeInsets.only(top: 5),
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                        border: Border.all(
-                                            color: CustomizedColors
-                                                .homeSubtitleColor)),
-                                    child: RaisedButton.icon(
-                                        padding:
-                                            EdgeInsets.fromLTRB(5, 0, 0, 0),
-                                        onPressed: () async {
-                                          final List<String> result =
-                                              await Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          DateFilter()));
-
-                                          startDate = result.first;
-
-                                          endDate = result.last;
-
-                                          print("range1" + startDate);
-
-                                          print("range2" + endDate);
-                                        },
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(5.0))),
-                                        label: Text(
-                                          'Date Filter',
-                                          style: TextStyle(
-                                              fontSize: 16.0,
-                                              color: CustomizedColors
-                                                  .buttonTitleColor),
-                                        ),
-                                        icon: Icon(Icons.date_range),
-
-                                        // textColor: Colors.red,
-
-                                        splashColor:
-                                            CustomizedColors.primaryColor,
-                                        color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 55,
-                                    width: 245,
-                                    margin: EdgeInsets.only(top: 5),
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                        border: Border.all(
-                                            color: CustomizedColors
-                                                .homeSubtitleColor)),
-                                    child: RaisedButton.icon(
-                                        padding: EdgeInsets.only(left: 25),
-                                        onPressed: () {
-                                          return showDialog(
-                                              context: context,
-                                              builder: (context) {
-                                                return AlertDialog(
-                                                  title:
-                                                      Text('Search Patients'),
-                                                  content: TextField(
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        valueText = value;
-
-                                                        print(valueText);
-                                                      });
-                                                    },
-                                                    controller: this
-                                                        ._textFieldController,
-                                                    decoration: InputDecoration(
-                                                        hintText:
-                                                            "Search Patients"),
-                                                  ),
-                                                  actions: <Widget>[
-                                                    FlatButton(
-                                                      color: CustomizedColors
-                                                          .accentColor,
-                                                      textColor: Colors.white,
-                                                      child: Text('CANCEL'),
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          Navigator.pop(
-                                                              context);
-                                                        });
-                                                      },
-                                                    ),
-                                                    FlatButton(
-                                                      color: CustomizedColors
-                                                          .accentColor,
-                                                      textColor: Colors.white,
-                                                      child: Text('OK'),
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          codeDialog =
-                                                              valueText;
-
-                                                          Navigator.pop(
-                                                              context);
-                                                        });
-                                                      },
-                                                    ),
-                                                  ],
-                                                );
-                                              });
-                                        },
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(5.0))),
-                                        label: Text(
-                                          "Search Patient" ??
-                                              "${this._textFieldController.text}",
-                                          style: TextStyle(
-                                            fontSize: 16.0,
-                                            color: CustomizedColors
-                                                .buttonTitleColor,
-                                          ),
-                                        ),
-                                        icon: Icon(Icons.search),
-                                        splashColor:
-                                            CustomizedColors.primaryColor,
-                                        color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 55,
-                                    width: 245,
-                                    margin: EdgeInsets.only(top: 5),
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(5.0),
-                                        border: Border.all(
-                                            color: CustomizedColors
-                                                .homeSubtitleColor)),
-                                    child: RaisedButton.icon(
-                                        padding:
-                                            EdgeInsets.fromLTRB(5, 0, 0, 0),
-                                        onPressed: () {
-                                          setState(() {
-                                            visibleSearchFilter = false;
-
-                                            visibleClearFilter = true;
-                                          });
-
-                                          Navigator.pop(context);
-
-                                          BlocProvider.of<PatientBloc>(context)
-                                              .add(GetSchedulePatientsList(
-                                                  keyword1: null,
-                                                  providerId: null,
-                                                  locationId: null,
-                                                  dictationId: null,
-                                                  startDate: null,
-                                                  endDate: null,
-                                                  searchString: null));
-                                        },
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(5.0))),
-                                        label: Text(
-                                          'Clear Filter',
-                                          style: TextStyle(
-                                              fontSize: 16.0,
-                                              color: CustomizedColors
-                                                  .buttonTitleColor),
-                                        ),
-                                        icon: Icon(Icons.filter_alt_sharp),
-
-                                        // textColor: Colors.red,
-
-                                        splashColor:
-                                            CustomizedColors.primaryColor,
-                                        color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  FlatButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text('Cancel'),
-                                  ),
-                                  FlatButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-
-                                      setState(() {
-                                        visibleSearchFilter = true;
-
-                                        visibleClearFilter = false;
-                                      });
-
-                                      BlocProvider.of<PatientBloc>(context).add(
-                                          GetSchedulePatientsList(
-                                              keyword1: null,
-                                              providerId: _currentSelectedProviderId !=
-                                                      null
-                                                  ? int.tryParse(
-                                                      _currentSelectedProviderId)
-                                                  : null,
-                                              locationId:
-                                                  _currentSelectedLocationId !=
-                                                          null
-                                                      ? int.tryParse(
-                                                          _currentSelectedLocationId)
-                                                      : null,
-                                              dictationId:
-                                                  _currentSelectedDictationId !=
-                                                          null
-                                                      ? int.tryParse(
-                                                          _currentSelectedDictationId)
-                                                      : null,
-                                              startDate:
-                                                  startDate !=
-                                                          ""
-                                                      ? startDate
-                                                      : null,
-                                              endDate: endDate != ""
-                                                  ? endDate
-                                                  : null,
-                                              searchString: this
-                                                          ._textFieldController
-                                                          .text !=
-                                                      null
-                                                  ? this._textFieldController.text
-                                                  : null));
-                                    },
-                                    child: Text('Ok'),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-//
+                    _testDialog(context);
                   },
                 ),
               ),
@@ -459,27 +179,34 @@ class _HomePortraitState extends State<HomePortrait> {
                           style: TextStyle(),
                         ),
                         actions: <Widget>[
-                          ProviderDropDowns(
-                            selectedValue: _currentSelectedProviderId,
-                            onTap: (String newValue) {
-                              print('onTap newValue $newValue');
-                              // setState(() {
-                              _currentSelectedProviderId = newValue;
-                              print(
-                                  'onTap _currentSelectedProviderId $_currentSelectedProviderId');
-                              // });
-                            },
-                          ),
-                          Dictation(onTapOfDictation: (String newValue) {
+                          ProviderDropDowns(onTapOfProviders: (newValue) {
+                            print('onTap newValue $newValue');
+                            setState(
+                              () {
+                                _currentSelectedProviderId =
+                                    (newValue as ProviderList).providerId;
+                                print(
+                                    'onTap _currentSelectedProviderId $_currentSelectedProviderId');
+                                // });
+                              },
+                            );
+                          }),
+                          Dictation(onTapOfDictation: (newValue) {
                             setState(() {
-                              _currentSelectedDictationId = newValue;
+                              _currentSelectedDictationId =
+                                  (newValue as DictationStatus)
+                                      .dictationstatusid;
+
                               print(_currentSelectedDictationId);
                             });
                           }),
-                          LocationDropDown(onTapOfLocation: (String newValue) {
+                          LocationDropDown(onTapOfLocation: (newValue) {
                             // setState(() {
-                            _currentSelectedLocationId = newValue;
+
+                            _currentSelectedLocationId = newValue.locationId;
+
                             print(_currentSelectedLocationId);
+
                             // });
                           }),
                           Row(
@@ -632,6 +359,8 @@ class _HomePortraitState extends State<HomePortrait> {
                                         visibleSearchFilter = false;
 
                                         visibleClearFilter = true;
+                                        datePicker = true;
+                                        dateRange = false;
                                       });
 
                                       Navigator.pop(context);
@@ -686,18 +415,15 @@ class _HomePortraitState extends State<HomePortrait> {
                                     keyword1: null,
                                     providerId:
                                         _currentSelectedProviderId != null
-                                            ? int.tryParse(
-                                                _currentSelectedProviderId)
+                                            ? _currentSelectedProviderId
                                             : null,
                                     locationId:
                                         _currentSelectedLocationId != null
-                                            ? int.tryParse(
-                                                _currentSelectedLocationId)
+                                            ? _currentSelectedLocationId
                                             : null,
                                     dictationId:
                                         _currentSelectedDictationId != null
-                                            ? int.tryParse(
-                                                _currentSelectedDictationId)
+                                            ? _currentSelectedDictationId
                                             : null,
                                   ));
                                 },
@@ -747,38 +473,83 @@ class _HomePortraitState extends State<HomePortrait> {
                     SizedBox(
                       height: 10,
                     ),
-                    Container(
-                      color: Colors.grey[100],
-                      child: DatePicker(
-                        DateTime.now().subtract(Duration(days: 3)),
-                        width: 45.0,
-                        height: 80,
-                        controller: _controller,
-                        initialSelectedDate: DateTime.now(),
-                        selectionColor: CustomizedColors.primaryColor,
-                        selectedTextColor: CustomizedColors.textColor,
-                        dayTextStyle: TextStyle(fontSize: 10.0),
-                        dateTextStyle: TextStyle(fontSize: 14.0),
-                        onDateChange: (date) {
-                          // New date selected
-                          setState(() {
-                            _selectedValue = date;
-                            var selectedDate = AppConstants.parseDate(
-                                -1, AppConstants.MMDDYYYY,
-                                dateTime: _selectedValue);
+                    Visibility(
+                      visible: datePicker,
+                      child: Container(
+                        color: Colors.grey[100],
+                        child: DatePicker(
+                          DateTime.now().subtract(Duration(days: 3)),
+                          width: 45.0,
+                          height: 80,
+                          controller: _controller,
+                          initialSelectedDate: DateTime.now(),
+                          selectionColor: CustomizedColors.primaryColor,
+                          selectedTextColor: CustomizedColors.textColor,
+                          dayTextStyle: TextStyle(fontSize: 10.0),
+                          dateTextStyle: TextStyle(fontSize: 14.0),
+                          onDateChange: (date) {
+                            // New date selected
+                            setState(() {
+                              _selectedValue = date;
+                              var selectedDate = AppConstants.parseDate(
+                                  -1, AppConstants.MMDDYYYY,
+                                  dateTime: _selectedValue);
 
-                            // getSelectedDateAppointments();
-                            BlocProvider.of<PatientBloc>(context).add(
-                                GetSchedulePatientsList(
-                                    keyword1: selectedDate,
-                                    providerId: null,
-                                    locationId: null,
-                                    dictationId: null));
-                            print(selectedDate);
-                          });
-                        },
+                              // getSelectedDateAppointments();
+                              BlocProvider.of<PatientBloc>(context).add(
+                                  GetSchedulePatientsList(
+                                      keyword1: selectedDate,
+                                      providerId: null,
+                                      locationId: null,
+                                      dictationId: null));
+                              print(selectedDate);
+                            });
+                          },
+                        ),
                       ),
                     ),
+                    Visibility(
+                        visible: dateRange,
+                        child: Center(
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                              Text("Selected date range is",
+                                  style: TextStyle(
+                                      color: CustomizedColors.buttonTitleColor,
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.bold)),
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Padding(
+                                        padding:
+                                            EdgeInsets.fromLTRB(5, 0, 0, 0)),
+                                    Text(
+                                      '${AppConstants.parseDatePattern(startDate, AppConstants.MMMddyyyy)}',
+                                      style: TextStyle(
+                                          color:
+                                              CustomizedColors.buttonTitleColor,
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      '-',
+                                      style: TextStyle(
+                                          color:
+                                              CustomizedColors.buttonTitleColor,
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                        '${AppConstants.parseDatePattern(endDate, AppConstants.MMMddyyyy)}',
+                                        style: TextStyle(
+                                            color: CustomizedColors
+                                                .buttonTitleColor,
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.bold))
+                                  ]),
+                            ])))
                   ],
                 ),
               ),
@@ -815,11 +586,6 @@ class _HomePortraitState extends State<HomePortrait> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
                                   children: <Widget>[
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [],
-                                    ),
                                     BlocBuilder<PatientBloc,
                                             PatientAppointmentBlocState>(
                                         builder: (context, state) {
@@ -865,120 +631,132 @@ class _HomePortraitState extends State<HomePortrait> {
                                       print(filteredPatients?.length);
                                       return filteredPatients != null &&
                                               filteredPatients.isNotEmpty
-                                          ? Card(
-                                              child: GroupedListView<dynamic,
-                                                      String>(
-                                                  elements: filteredPatients,
-                                                  shrinkWrap: true,
-                                                  groupBy: (element) {
-                                                    print(
-                                                        'groupBy ${element.practice}');
+                                          ? LazyLoadScrollView(
+                                              isLoading: isLoadingVertical,
+                                              onEndOfPage: () =>
+                                                  _loadMoreVertical(),
+                                              child: Card(
+                                                child: GroupedListView<dynamic,
+                                                        String>(
+                                                    elements: filteredPatients,
+                                                    shrinkWrap: true,
+                                                    groupBy: (element) {
+                                                      print(
+                                                          'groupBy ${element.practice}');
 
-                                                    return element.practice;
-                                                  },
-                                                  groupSeparatorBuilder: (String
-                                                          practice) =>
-                                                      TransactionGroupSeparator(
-                                                        practice: practice,
-                                                      ),
-                                                  order: GroupedListOrder.ASC,
-                                                  itemBuilder:
-                                                      (context, element) =>
-                                                          Hero(
-                                                            tag: element,
-                                                            child: Material(
-                                                              child: ListTile(
-                                                                contentPadding:
-                                                                    EdgeInsets
-                                                                        .all(0),
-                                                                leading: Icon(
-                                                                  Icons
-                                                                      .bookmark,
-                                                                  color: Colors
-                                                                      .green,
-                                                                ),
-                                                                onTap: () {
-                                                                  Navigator
-                                                                      .push(
-                                                                    context,
-                                                                    MaterialPageRoute(
-                                                                      builder:
-                                                                          (context) =>
-                                                                              PatientDetail(),
-                                                                      // Pass the arguments as part of the RouteSettings. The
-                                                                      // DetailScreen reads the arguments from these settings.
-                                                                      settings:
-                                                                          RouteSettings(
-                                                                        arguments:
-                                                                            element,
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                },
-                                                                title: Text(element
-                                                                    .patient
-                                                                    .displayName),
-                                                                subtitle:
-                                                                    Column(
-                                                                  children: [
+                                                      return element.practice;
+                                                    },
+                                                    groupSeparatorBuilder: (String
+                                                            practice) =>
+                                                        TransactionGroupSeparator(
+                                                            practice: practice,
+                                                            appointmentsCount:
+                                                                practice
+                                                                    .length),
+                                                    order: GroupedListOrder.ASC,
+                                                    itemBuilder:
+                                                        (context, element) =>
+                                                            Hero(
+                                                              tag: element,
+                                                              child: Material(
+                                                                child:
                                                                     Container(
-                                                                      child: Text("Dr." +
-                                                                              "" +
-                                                                              element.providerName ??
-                                                                          ""),
+                                                                  decoration: new BoxDecoration(
+                                                                      border: new Border(
+                                                                          bottom:
+                                                                              new BorderSide(color: CustomizedColors.homeSubtitleColor))),
+                                                                  child:
+                                                                      ListTile(
+                                                                    tileColor:
+                                                                        CustomizedColors
+                                                                            .iconColor,
+                                                                    contentPadding:
+                                                                        EdgeInsets
+                                                                            .all(0),
+                                                                    leading:
+                                                                        Icon(
+                                                                      Icons
+                                                                          .bookmark,
+                                                                      color: Colors
+                                                                          .green,
                                                                     ),
-                                                                    Row(
-                                                                      children: [
-                                                                        Container(
-                                                                          width:
-                                                                              50,
-                                                                          child: Text(
-                                                                              element.appointmentType ?? "",
-                                                                              style: TextStyle(fontSize: 12.0)),
+                                                                    onTap: () {
+                                                                      Navigator
+                                                                          .push(
+                                                                        context,
+                                                                        MaterialPageRoute(
+                                                                          builder: (context) =>
+                                                                              PatientDetail(),
+                                                                          // Pass the arguments as part of the RouteSettings. The
+                                                                          // DetailScreen reads the arguments from these settings.
+                                                                          settings:
+                                                                              RouteSettings(
+                                                                            arguments:
+                                                                                element,
+                                                                          ),
                                                                         ),
-                                                                        Expanded(
-                                                                          child:
-                                                                              Container(
-                                                                            width:
-                                                                                75,
-                                                                            child:
-                                                                                Text(
+                                                                      );
+                                                                    },
+                                                                    title: Text(element
+                                                                        .patient
+                                                                        .displayName),
+                                                                    subtitle:
+                                                                        Column(
+                                                                      children: [
+                                                                        Row(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              child: Text(
+                                                                                "Dr." + "" + element.providerName ?? "",
+                                                                                overflow: TextOverflow.ellipsis,
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        Row(
+                                                                          children: [
+                                                                            Expanded(
+                                                                              child: Text(element.scheduleName ?? "", style: TextStyle(fontSize: 12.0)),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        Row(
+                                                                          children: [
+                                                                            Text(
                                                                               element.appointmentStatus ?? "",
                                                                               overflow: TextOverflow.ellipsis,
                                                                               style: TextStyle(fontSize: 12.0),
                                                                             ),
-                                                                          ),
-                                                                        )
+                                                                          ],
+                                                                        ),
                                                                       ],
                                                                     ),
-                                                                  ],
-                                                                ),
-                                                                trailing:
-                                                                    Column(
-                                                                  children: [
-                                                                    Spacer(),
-                                                                    Spacer(),
-                                                                    RichText(
-                                                                      text:
-                                                                          TextSpan(
-                                                                        text:
-                                                                            '• ',
-                                                                        style: TextStyle(
-                                                                            color:
-                                                                                Colors.red,
-                                                                            fontSize: 14),
-                                                                        children: <
-                                                                            TextSpan>[
-                                                                          TextSpan(
-                                                                              text: 'Dictation' + element.dictationStatus ?? ""),
-                                                                        ],
-                                                                      ),
-                                                                    )
-                                                                  ],
+                                                                    trailing: element.dictationStatus ==
+                                                                            "Pending"
+                                                                        ? Column(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.end,
+                                                                            children: [
+                                                                              RichText(
+                                                                                text: TextSpan(
+                                                                                  text: '• ',
+                                                                                  style: TextStyle(color: CustomizedColors.dotColor, fontSize: 16),
+                                                                                  children: <TextSpan>[
+                                                                                    TextSpan(text: 'Dictation' + " " + element.dictationStatus ?? "", style: TextStyle(color: CustomizedColors.dictationStatusColor, fontSize: 14)),
+                                                                                  ],
+                                                                                ),
+                                                                              )
+                                                                            ],
+                                                                          )
+                                                                        : Container(
+                                                                            width:
+                                                                                5,
+                                                                          ),
+                                                                  ),
                                                                 ),
                                                               ),
-                                                            ),
-                                                          )),
+                                                            )),
+                                              ),
                                             )
                                           : Container(
                                               //   child: Text(
@@ -1040,18 +818,294 @@ class _HomePortraitState extends State<HomePortrait> {
       ),
     );
   }
+
+  _testDialog(BuildContext buildContext) {
+    return showDialog(
+      context: buildContext,
+      builder: (ctx) => ListView(
+        children: [
+          AlertDialog(
+            title: Text(
+              "Select a filter",
+              style: TextStyle(),
+            ),
+            actions: <Widget>[
+              ProviderDropDowns(onTapOfProviders: (newValue) {
+                print('onTap newValue $newValue');
+                setState(
+                  () {
+                    _currentSelectedProviderId =
+                        (newValue as ProviderList).providerId;
+                    print(
+                        'onTap _currentSelectedProviderId $_currentSelectedProviderId');
+// });
+                  },
+                );
+              }),
+              Dictation(onTapOfDictation: (newValue) {
+                setState(() {
+                  _currentSelectedDictationId =
+                      (newValue as DictationStatus).dictationstatusid;
+
+                  print(_currentSelectedDictationId);
+                });
+              }),
+              LocationDropDown(onTapOfLocation: (newValue) {
+// setState(() {
+
+                _currentSelectedLocationId = newValue.locationId;
+
+                print(_currentSelectedLocationId);
+
+// });
+              }),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 55,
+                    width: 245,
+                    margin: EdgeInsets.only(top: 5),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        border: Border.all(
+                            color: CustomizedColors.homeSubtitleColor)),
+                    child: RaisedButton.icon(
+                        padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+                        onPressed: () async {
+                          final List<String> result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => DateFilter()));
+
+                          startDate = result.first;
+
+                          endDate = result.last;
+
+                          print("range1" + startDate);
+
+                          print("range2" + endDate);
+                        },
+                        shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(5.0))),
+                        label: Text(
+                          'Date Filter',
+                          style: TextStyle(
+                              fontSize: 16.0,
+                              color: CustomizedColors.buttonTitleColor),
+                        ),
+                        icon: Icon(Icons.date_range),
+
+                        // textColor: Colors.red,
+
+                        splashColor: CustomizedColors.primaryColor,
+                        color: Colors.white),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 55,
+                    width: 245,
+                    margin: EdgeInsets.only(top: 5),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        border: Border.all(
+                            color: CustomizedColors.homeSubtitleColor)),
+                    child: RaisedButton.icon(
+                        padding: EdgeInsets.only(left: 25),
+                        onPressed: () {
+                          return showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text('Search Patients'),
+                                  content: TextField(
+                                    onChanged: (value) {
+                                      setState(() {
+                                        valueText = value;
+
+                                        print(valueText);
+                                      });
+                                    },
+                                    controller: this._textFieldController,
+                                    decoration: InputDecoration(
+                                        hintText: "Search Patients"),
+                                  ),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      color: CustomizedColors.accentColor,
+                                      textColor: Colors.white,
+                                      child: Text('CANCEL'),
+                                      onPressed: () {
+                                        setState(() {
+                                          Navigator.pop(context);
+                                        });
+                                      },
+                                    ),
+                                    FlatButton(
+                                      color: CustomizedColors.accentColor,
+                                      textColor: Colors.white,
+                                      child: Text('OK'),
+                                      onPressed: () {
+                                        setState(() {
+                                          codeDialog = valueText;
+
+                                          Navigator.pop(context);
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                );
+                              });
+                        },
+                        shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(5.0))),
+                        label: Text(
+                          "Search Patient" ??
+                              "${this._textFieldController.text}",
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            color: CustomizedColors.buttonTitleColor,
+                          ),
+                        ),
+                        icon: Icon(Icons.search),
+                        splashColor: CustomizedColors.primaryColor,
+                        color: Colors.white),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 55,
+                    width: 245,
+                    margin: EdgeInsets.only(top: 5),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        border: Border.all(
+                            color: CustomizedColors.homeSubtitleColor)),
+                    child: RaisedButton.icon(
+                        padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+                        onPressed: () {
+                          setState(() {
+                            visibleSearchFilter = false;
+
+                            visibleClearFilter = true;
+                            datePicker = true;
+                            dateRange = false;
+                          });
+
+                          Navigator.pop(context);
+
+                          BlocProvider.of<PatientBloc>(context).add(
+                              GetSchedulePatientsList(
+                                  keyword1: null,
+                                  providerId: null,
+                                  locationId: null,
+                                  dictationId: null,
+                                  startDate: null,
+                                  endDate: null,
+                                  searchString: null));
+                        },
+                        shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(5.0))),
+                        label: Text(
+                          'Clear Filter',
+                          style: TextStyle(
+                              fontSize: 16.0,
+                              color: CustomizedColors.buttonTitleColor),
+                        ),
+                        icon: Icon(Icons.filter_alt_sharp),
+
+                        // textColor: Colors.red,
+
+                        splashColor: CustomizedColors.primaryColor,
+                        color: Colors.white),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  FlatButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Cancel'),
+                  ),
+                  FlatButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+
+                      setState(() {
+                        visibleSearchFilter = true;
+
+                        visibleClearFilter = false;
+                        datePicker = false;
+                        dateRange = true;
+                      });
+
+                      BlocProvider.of<PatientBloc>(context).add(
+                          GetSchedulePatientsList(
+                              keyword1: null,
+                              providerId:
+                                  _currentSelectedProviderId !=
+                                          null
+                                      ? _currentSelectedProviderId
+                                      : null,
+                              locationId:
+                                  _currentSelectedLocationId !=
+                                          null
+                                      ? _currentSelectedLocationId
+                                      : null,
+                              dictationId: _currentSelectedDictationId != null
+                                  ? int.tryParse(_currentSelectedDictationId)
+                                  : null,
+                              startDate: startDate != "" ? startDate : null,
+                              endDate: endDate != "" ? endDate : null,
+                              searchString:
+                                  this._textFieldController.text != null
+                                      ? this._textFieldController.text
+                                      : null));
+                    },
+                    child: Text('Ok'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    print('dispose');
+    Navigator.of(context).pop();
+    super.dispose();
+  }
 }
 
 class TransactionGroupSeparator extends StatelessWidget {
   final String practice;
-  TransactionGroupSeparator({this.practice});
+  final int appointmentsCount;
+  TransactionGroupSeparator({this.practice, this.appointmentsCount});
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Container(
         child: Text(
-          "${this.practice}",
+          "${this.practice} ${[this.appointmentsCount]}",
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),

@@ -1,8 +1,6 @@
-// To parse this JSON data, do
-//
-//     final Location = LocationFromJson(jsonString);
-
 import 'dart:convert';
+
+import 'package:equatable/equatable.dart';
 
 Locations LocationFromJson(String str) => Locations.fromJson(json.decode(str));
 
@@ -58,7 +56,7 @@ class Header {
       };
 }
 
-class LocationList {
+class LocationList extends Equatable {
   LocationList({
     this.locationId,
     this.locationName,
@@ -81,4 +79,17 @@ class LocationList {
         "locationName": locationName == null ? null : locationName,
         "memberId": memberId == null ? null : memberId,
       };
+
+  @override
+  String toString() {
+    return 'LocationList{locationId: $locationId, locationName: $locationName, memberId: $memberId}';
+  }
+
+  @override
+// TODO: implement props
+  List<Object> get props => [
+        this.locationId,
+        this.locationName,
+        this.memberId,
+      ];
 }

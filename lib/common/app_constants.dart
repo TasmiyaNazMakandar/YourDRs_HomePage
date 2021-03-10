@@ -70,6 +70,15 @@ class AppConstants {
     }
   }
 
+  static String parseDatePattern(String inputPattern, String outPattern) {
+    try {
+      return DateFormat(outPattern).format(DateTime.parse(inputPattern));
+    } catch (e, s) {
+      AppLogHelper.printLogs("parseDatePattern", e, s);
+      return "";
+    }
+  }
+
   static String parseDateWith(int time, DateFormat dateFormatter,
       {DateTime dateTime}) {
     if ((time == null || time < 1) && dateTime == null) {

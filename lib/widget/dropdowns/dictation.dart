@@ -1,76 +1,73 @@
-import 'package:YOURDRS_FlutterAPP/common/app_strings.dart';
-import 'package:YOURDRS_FlutterAPP/widget/buttons/dropdowns.dart';
+import '../../network/models/dictation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:searchable_dropdown/searchable_dropdown.dart';
 
 class Dictation extends StatefulWidget {
   final onTapOfDictation;
   Dictation({@required this.onTapOfDictation});
+
   @override
-  _DictationState createState() => _DictationState();
+  _DictationSearchState createState() => _DictationSearchState();
 }
 
-class _DictationState extends State<Dictation> {
-  var _currentSelectedValue;
+class _DictationSearchState extends State<Dictation> {
+  bool searching = false;
+  DictationStatus _currentSelectedValue;
   final String url = "https://jsonplaceholder.typicode.com/users";
 
-  List data = List(); //edited line
-  Future<String> getDictationStatus() async {
+  List<DictationStatus> data = List(); //edited line
+
+//get dictation method from json
+  Future<String> getDictation() async {
     String jsonData = await DefaultAssetBundle.of(context)
-        .loadString(AppStrings.dictationJson);
+        .loadString("assets/json/appointment.json");
     final jsonResult = json.decode(jsonData);
-    print(jsonResult);
-    data = jsonResult;
+    data = List<DictationStatus>.from(
+        jsonResult.map((x) => DictationStatus.fromJson(x)));
+
     setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    // this.getSWData();
-    this.getDictationStatus();
+    this.getDictation();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 5, right: 24),
-            child: Container(
-                height: 55,
-                width: 245,
-                child: FormField<String>(
-                  builder: (FormFieldState<String> state) {
-                    return InputDecorator(
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0))),
-                      isEmpty: _currentSelectedValue == '',
-                      child: DropDown(
-                        value: _currentSelectedValue,
-                        hint: "Dictation",
-                        onChanged: (value) {
-                          setState(() {
-                            _currentSelectedValue = value;
-                          });
-                          widget.onTapOfDictation(value);
-                        },
-                        items: data.map((item) {
-                          return DropdownMenuItem<String>(
-                            child: new Text(item['dictationstatus']),
-                            value: item['dictationstatusid'].toString(),
-                          );
-                        }).toList(),
-                      ),
-                    );
-                  },
-                )),
-          ),
-        ],
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(10),
+      width: 320,
+      child: SearchableDropdown.single(
+        hint: Text('Select Dictation'),
+        label: Text(
+          ' Dictation',
+          style: TextStyle(
+              fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        items: data.map((item) {
+          print('item $item');
+          return DropdownMenuItem<DictationStatus>(
+            child: new Text(item.dictationstatus),
+            value: item,
+          );
+        }).toList(),
+        value: _currentSelectedValue,
+        isExpanded: true,
+        searchHint: new Text('Select ', style: new TextStyle(fontSize: 20)),
+        onChanged: (value) {
+          print('value $value');
+          setState(
+            () {
+              _currentSelectedValue = value;
+            },
+          );
+          widget.onTapOfDictation(value);
+        },
       ),
     );
   }
